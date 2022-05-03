@@ -1,5 +1,16 @@
 const authorModel = require("../models/authorModel");
 const jwt = require("jsonwebtoken");
+const res = require("express/lib/response");
+
+const typeChecking = function(data){
+    if(typeof data !== 'string'){
+        return false;
+    }else if(typeof data === 'string' && data.trim().length == 0){
+        return false;
+    }else{
+        return true;
+    }
+}
 
 const createAuthor = async function (req, res) {
     
@@ -7,39 +18,54 @@ const createAuthor = async function (req, res) {
         let data = req.body;
         
         let {fname , lname , title , email , password} = data;
+
         if(!fname){
-            return res.status(400).send({msg: "First Name is required...!"});
+            return res.status(400).send({status: false,msg: "First Name is required...!"});
+        }
+        if(!typeChecking(fname)){
+            return res.status(400).send({status: false,msg: "Please enter the first name in right format...!"});
         }
         if(!lname){
-            return res.status(400).send({msg: "LastName is required..!"});
+            return res.status(400).send({status: false,msg: "Last name is required...!"});
+        }
+        if(!typeChecking(lname)){
+            return res.status(400).send({status: false,msg: "Please enter the last name in right format....!"});
         }
         if(!title){
-            return res.status(400).send({msg: "Title is required...!"});
+            return res.status(400).send({status: false,msg: "Title is required...!"});
+        }
+        if(!typeChecking(title)){
+            return res.status(400).send({status: false,msg: "Please enter the title in right format....!"});
         }
         if(!email){
-            return res.status(400).send({msg: "Email is required...!"});
+            return res.status(400).send({status: false,msg: "Email is required...!"});
+        }
+        if(!typeChecking(email)){
+            return res.status(400).send({status: false,msg: "Please enter the email in right format...!"});
         }
         if(!password){
-            return res.status(400).send({msg: "Password is required...!"});
+            return res.status(400).send({status: false,msg: "Password is required...!"});
+        }
+        if(!typeChecking(password)){
+            return res.status(400).send({status: false,msg: "Please enter the password in right format...!"});
         }
 
         let createData = await authorModel.create(data);
-        res.status(201).send({ Data: createData });
+        res.status(201).send({status: true, Data: createData });
     }
     catch (err) {
-        res.status(500).send({ msg: "Error", error: err.message });
+        res.status(500).send({status: false, msg: "Error", error: err.message });
     }
 }
 
 
 const login = async function (req, res) {
-
     try {
         let emailId = req.body.email;
         let pass = req.body.password;
 
         if (!(emailId && pass)) {
-            return res.status(400).send({ err: "Email-Id and Password must be provided...!" });
+            return res.status(400).send({status: false, err: "Email-Id and Password must be provided...!" });
         }
 
         let user = await authorModel.findOne({ email: emailId, password: pass });
@@ -58,7 +84,7 @@ const login = async function (req, res) {
         res.status(200).send({ status: true, data: token });
     }
     catch (err) {
-        res.status(500).send({ msg: "Error", error: err.message });
+        res.status(500).send({status: false, msg: "Error", error: err.message });
     }
 };
 
